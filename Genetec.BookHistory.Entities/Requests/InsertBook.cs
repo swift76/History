@@ -15,6 +15,6 @@ namespace Genetec.BookHistory.Entities.Requests
         public override DateOnly? PublishDate { get; set; }
 
         [Required(ErrorMessage = "Authors are not provided")]
-        public override List<string>? Authors { get; set; }
+        public override IEnumerable<Author>? Authors { get; set; }
     }
 }

@@ -7,6 +7,7 @@ CREATE TABLE Book (
 	Title				nvarchar(200)	NOT NULL,
 	ShortDescription	nvarchar(2000)	NOT NULL,
 	PublishDate			date			NOT NULL,
-	IsDeleted			bit				NOT NULL	default 0
+	IsDeleted			bit				NOT NULL	default 0,
+	RevisionNumber		int				NOT NULL
 )
 GO

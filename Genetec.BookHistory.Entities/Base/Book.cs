@@ -1,15 +1,23 @@
-﻿namespace Genetec.BookHistory.Entities.Base
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Genetec.BookHistory.Entities.Base
 {
     public abstract class Book
     {
+        [MaxLength(200)]
         public virtual string? Title { get; set; }
-        
+
+        [MaxLength(2000)]
         public virtual string? ShortDescription { get; set; }
         
         public virtual DateOnly? PublishDate { get; set; }
 
         //Just plain list of authors' names (without IDs), as CRUD operations on authors are out of scope.
-        //As there are authors with just a single name (like Petrarch or Stendhal), not split to first/last/middle names :).
-        public virtual List<string>? Authors { get; set; }
+        public virtual IEnumerable<Author>? Authors { get; set; }
+
+        public IEnumerable<string>? GetNormalizedAuthors()
+        {
+            return Authors?.Select(item => item.Name.Trim());
+        }
     }
 }

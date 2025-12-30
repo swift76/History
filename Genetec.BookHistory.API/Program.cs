@@ -1,8 +1,19 @@
+using Genetec.BookHistory.Entities.RepositoryContracts;
+using Genetec.BookHistory.SQLRepositories;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+var sqlServerConnectionString = builder.Configuration.GetConnectionString("SQLServer");
+if (!string.IsNullOrWhiteSpace(sqlServerConnectionString))
+{
+    builder.Services.AddSingleton<IBookRepository>(new BookRepository(sqlServerConnectionString));
+}
+else
+{
+    throw new Exception("Connection string is not specified");
+}
 
 builder.Services.AddControllers();
 

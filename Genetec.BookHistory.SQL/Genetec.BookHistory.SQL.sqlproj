@@ -57,6 +57,8 @@
   <ItemGroup>
     <Folder Include="Properties" />
     <Folder Include="Tables" />
+    <Folder Include="Procedures" />
+    <Folder Include="Types" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Tables\Book.sql" />
@@ -66,5 +68,23 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Tables\Author.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Procedures\gn0sp_InsertBook.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Types\Author.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Procedures\gn0sp_GetBook.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Procedures\gn0sp_GetAuthors.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Procedures\gn0sp_UpdateBook.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Procedures\gn0sp_DeleteBook.sql" />
   </ItemGroup>
 </Project>
