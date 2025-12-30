@@ -1,4 +1,5 @@
 ﻿using Genetec.BookHistory.Entities.Base;
+using Genetec.BookHistory.Entities.Extensions;
 
 namespace Genetec.BookHistory.Entities.Requests
 {
@@ -24,7 +25,7 @@ namespace Genetec.BookHistory.Entities.Requests
                 return null;
             }
 
-            if (PublishDate.Value.ToDateTime(TimeOnly.MinValue) == currentPublishDate)
+            if (PublishDate.Value.ConvertToDateTime() == currentPublishDate)
             {
                 return null;
             }
@@ -34,7 +35,7 @@ namespace Genetec.BookHistory.Entities.Requests
 
         public IEnumerable<string>? GetUpdatedAuthors(IEnumerable<Author>? currentAuthors)
         {
-            if (Authors == null || Authors.Count() == 0)
+            if (Authors == null || !Authors.Any())
             {
                 return null;
             }

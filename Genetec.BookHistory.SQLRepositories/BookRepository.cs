@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Genetec.BookHistory.Entities.Base;
+using Genetec.BookHistory.Entities.Extensions;
 using Genetec.BookHistory.Entities.RepositoryContracts;
 using Genetec.BookHistory.Entities.Responses;
 using Genetec.BookHistory.SQLRepositories.Base;
@@ -13,7 +14,7 @@ namespace Genetec.BookHistory.SQLRepositories
             DynamicParameters parameters = new();
             parameters.Add("Title", title);
             parameters.Add("ShortDescription", shortDescription);
-            parameters.Add("PublishDate", publishDate.ToDateTime(TimeOnly.MinValue));
+            parameters.Add("PublishDate", publishDate.ConvertToDateTime());
             AddSystemTableValuedParameter(parameters, "Name", "Authors", authors);
             return await GetSingleAsync<InsertBookResult>(parameters, "gn0sp_InsertBook");
         }
@@ -32,7 +33,7 @@ namespace Genetec.BookHistory.SQLRepositories
             }
             if (publishDate.HasValue)
             {
-                parameters.Add("PublishDate", publishDate.Value.ToDateTime(TimeOnly.MinValue));
+                parameters.Add("PublishDate", publishDate.Value.ConvertToDateTime());
             }
             if (authors != null && authors.Any())
             {
