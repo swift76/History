@@ -1,6 +1,9 @@
-﻿namespace Genetec.BookHistory.Entities.Responses
+﻿using Genetec.BookHistory.Entities.Base;
+using Genetec.BookHistory.Entities.Enums;
+
+namespace Genetec.BookHistory.Entities.Responses
 {
-    public class BookHistoryResult
+    public class BookHistoryResult : Book
     {
         public int Id { get; set; }
 
@@ -8,14 +11,6 @@
 
         public DateTime OperationDate { get; set; }
 
-        public byte OperationId { get; set; }
-
-        public string? Title { get; set; }
-
-        public string? ShortDescription { get; set; }
-
-        public DateTime? PublishDate { get; set; }
-
-        public string? Authors { get; set; }
+        public BookOperation OperationId { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace Genetec.BookHistory.SQLRepositories.Base
     {
         private readonly string connectionString = connectionString;
 
-        public async Task<IEnumerable<T>> GetListAsync<T>(DynamicParameters parameters
+        public async Task<IEnumerable<T>> GetListAsync<T>(DynamicParameters? parameters
             , string procedureName
             , int timeoutInterval = 180
             , CommandType cmdType = CommandType.StoredProcedure)
@@ -17,7 +17,7 @@ namespace Genetec.BookHistory.SQLRepositories.Base
             return await connection.QueryAsync<T>(procedureName, parameters, commandType: cmdType, commandTimeout: timeoutInterval);
         }
 
-        public async Task<T?> GetSingleAsync<T>(DynamicParameters parameters
+        public async Task<T?> GetSingleAsync<T>(DynamicParameters? parameters
             , string procedureName
             , int timeoutInterval = 180
             , CommandType cmdType = CommandType.StoredProcedure)
@@ -26,7 +26,7 @@ namespace Genetec.BookHistory.SQLRepositories.Base
             return await connection.QueryFirstOrDefaultAsync<T>(procedureName, parameters, commandType: cmdType, commandTimeout: timeoutInterval);
         }
 
-        public async Task ExecuteAsync(DynamicParameters parameters
+        public async Task ExecuteAsync(DynamicParameters? parameters
             , string procedureName
             , int timeoutInterval = 180
             , CommandType cmdType = CommandType.StoredProcedure)

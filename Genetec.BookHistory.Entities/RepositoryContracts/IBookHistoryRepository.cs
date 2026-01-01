@@ -1,9 +1,12 @@
-﻿using Genetec.BookHistory.Entities.Responses;
+﻿using Genetec.BookHistory.Entities.Base;
+using Genetec.BookHistory.Entities.Filters;
+using Genetec.BookHistory.Entities.Orders;
+using Genetec.BookHistory.Entities.Paging;
 
 namespace Genetec.BookHistory.Entities.RepositoryContracts
 {
     public interface IBookHistoryRepository
     {
-        Task<IEnumerable<BookHistoryResult>> Get(int? pageNumber = null, int? pageSize = null);
+        Task<IEnumerable<BookHistoryDto>> Get(BookHistoryFilter? filter = null, IEnumerable<BookHistoryOrder>? orders = null, PagingParameters? pagingParameters = null);
     }
 }
