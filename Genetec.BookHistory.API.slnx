@@ -10,4 +10,5 @@
   </Folder>
   <Project Path="Genetec.BookHistory.API/Genetec.BookHistory.API.csproj" />
   <Project Path="Genetec.BookHistory.Entities/Genetec.BookHistory.Entities.csproj" />
+  <Project Path="Genetec.BookHistory.Utilities/Genetec.BookHistory.Utilities.csproj" Id="6f7bc5ce-8798-4bae-bc0e-2d2aaf48e261" />
 </Solution>

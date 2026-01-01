@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using Genetec.BookHistory.Entities.Base;
-using Genetec.BookHistory.Entities.Extensions;
+using Genetec.BookHistory.Utilities.Extensions;
 using Genetec.BookHistory.Entities.RepositoryContracts;
 using Genetec.BookHistory.Entities.Responses;
 using Genetec.BookHistory.SQLRepositories.Base;

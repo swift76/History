@@ -1,5 +1,5 @@
 ﻿using Genetec.BookHistory.Entities.Base;
-using Genetec.BookHistory.Entities.Extensions;
+using Genetec.BookHistory.Utilities.Extensions;
 
 namespace Genetec.BookHistory.Entities.Requests
 {

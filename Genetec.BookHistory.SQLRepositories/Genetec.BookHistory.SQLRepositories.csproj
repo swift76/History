@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Genetec.BookHistory.Entities\Genetec.BookHistory.Entities.csproj" />
+    <ProjectReference Include="..\Genetec.BookHistory.Utilities\Genetec.BookHistory.Utilities.csproj" />
   </ItemGroup>
 
 </Project>

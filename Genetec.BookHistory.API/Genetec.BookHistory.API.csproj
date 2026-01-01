@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.0" />
   </ItemGroup>
@@ -15,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Genetec.BookHistory.Entities\Genetec.BookHistory.Entities.csproj" />
     <ProjectReference Include="..\Genetec.BookHistory.SQLRepositories\Genetec.BookHistory.SQLRepositories.csproj" />
+    <ProjectReference Include="..\Genetec.BookHistory.Utilities\Genetec.BookHistory.Utilities.csproj" />
   </ItemGroup>
 
 </Project>

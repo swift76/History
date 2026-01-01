@@ -1,4 +1,4 @@
-﻿using Genetec.BookHistory.Entities.Extensions;
+﻿using Genetec.BookHistory.Utilities.Extensions;
 
 namespace Genetec.BookHistory.Entities.Filters
 {

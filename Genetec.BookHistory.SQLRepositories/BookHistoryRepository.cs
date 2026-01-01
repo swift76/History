@@ -1,11 +1,14 @@
 ﻿using Dapper;
 using Genetec.BookHistory.Entities.Base;
 using Genetec.BookHistory.Entities.Enums;
-using Genetec.BookHistory.Entities.Extensions;
+using Genetec.BookHistory.Utilities;
+using Genetec.BookHistory.Utilities.Extensions;
 using Genetec.BookHistory.Entities.Filters;
 using Genetec.BookHistory.Entities.Orders;
 using Genetec.BookHistory.Entities.Paging;
 using Genetec.BookHistory.Entities.RepositoryContracts;
+using Genetec.BookHistory.Entities.Responses;
+using Genetec.BookHistory.SQLRepositories.Data;
 using Genetec.BookHistory.SQLRepositories.Base;
 using System.Data;
 using System.Text;
@@ -14,19 +17,39 @@ namespace Genetec.BookHistory.SQLRepositories
 {
     public class BookHistoryRepository(string connectionString) : BaseRepository(connectionString), IBookHistoryRepository
     {
-        public async Task<IEnumerable<BookHistoryDto>> Get(BookHistoryFilter? filter = null, IEnumerable<BookHistoryOrder>? orders = null, PagingParameters? pagingParameters = null)
+        public async Task<IEnumerable<BookHistoryResult>> Get(BookHistoryFilter? filter = null
+            , IEnumerable<BookHistoryOrder>? orders = null
+            , PagingParameters? pagingParameters = null
+            , IEnumerable<BookHistoryField>? groups = null)
         {
             DynamicParameters parameters = new();
 
-            var sqlBuilder = new StringBuilder(@"select Id, BookId, OperationDate, OperationId, Title, ShortDescription, PublishDate, Authors
-                from BookHistory with (nolock)");
-
-            if (orders == null || !orders.Any())
+            List<string> selectColumns;
+            List<string>? groupColumns;
+            if (groups == null || !groups.Any())
             {
-                orders = [ new BookHistoryOrder() {
-                    Field = BookHistoryField.Id
-                }];
+                selectColumns = [.. Enum.GetNames<BookHistoryField>()];
+                groupColumns = null;
             }
+            else
+            {
+                selectColumns = [.. groups.Select(item => item.ToString())];
+                groupColumns = [.. selectColumns];
+                
+                //Workaround for json-typed Authors, to avoid exceptions during grouping
+                int indexAuthors = selectColumns.IndexOf("Authors");
+                if (indexAuthors >= 0)
+                {
+                    var authorsConvertSql = GetJsonConvertSql("Authors");
+                    selectColumns[indexAuthors] = $"{authorsConvertSql} as Authors";
+                    groupColumns[indexAuthors] = authorsConvertSql;
+                }
+
+                selectColumns.Add("count(*) as Count");
+            }
+
+            var sqlBuilder = new StringBuilder($@"select {ListJoiner.Get(selectColumns)}
+                from BookHistory with (nolock)");
 
             if (filter != null)
             {
@@ -35,14 +58,14 @@ namespace Genetec.BookHistory.SQLRepositories
 
                 if (filter.BookIdFilter?.Values?.Count() > 0)
                 {
-                    sqlBuilder.Append($" and {GetNegationSql(filter.BookIdFilter)}BookId in ({string.Join(",", filter.BookIdFilter.Values)})");
+                    sqlBuilder.Append($" and {GetNegationSql(filter.BookIdFilter)}BookId in ({ListJoiner.Get(filter.BookIdFilter.Values)})");
                 }
 
                 GenerateRangeFilter(filter.OperationDateFilters, "OperationDate", ref sqlBuilder, ref parameters);
 
                 if (filter.OperationTypeFilter?.Values?.Count() > 0)
                 {
-                    sqlBuilder.Append($" and {GetNegationSql(filter.OperationTypeFilter)}OperationId in ({string.Join(",", filter.OperationTypeFilter.Values.Select(item => (byte)item))})");
+                    sqlBuilder.Append($" and {GetNegationSql(filter.OperationTypeFilter)}OperationId in ({ListJoiner.Get(filter.OperationTypeFilter.Values.Select(item => (byte)item))})");
                 }
 
                 GenerateStringFilter(filter.TitleFilters, "Title", ref sqlBuilder, ref parameters);
@@ -67,10 +90,34 @@ namespace Genetec.BookHistory.SQLRepositories
                 }
             }
 
-            sqlBuilder.AppendLine();
-            sqlBuilder.Append("order by ");
-            if (orders != null)
+            if (groupColumns != null)
             {
+                sqlBuilder.AppendLine();
+                sqlBuilder.Append($"group by {ListJoiner.Get(groupColumns)}");
+            }
+
+            if (orders != null || pagingParameters != null)
+            {
+                if (orders == null || !orders.Any())
+                {
+                    if (groups != null && groups.Any())
+                    {
+                        orders = groups.Select(item => new BookHistoryOrder()
+                        {
+                            Field = item,
+                            IsDescending = false
+                        });
+                    }
+                    else
+                    {
+                        orders = [ new BookHistoryOrder() {
+                            Field = BookHistoryField.Id
+                        }];
+                    }
+                }
+
+                sqlBuilder.AppendLine();
+                sqlBuilder.Append("order by ");
                 var isFirstOrder = true;
                 foreach (var order in orders)
                 {
@@ -89,16 +136,33 @@ namespace Genetec.BookHistory.SQLRepositories
                         sqlBuilder.Append(" desc");
                     }
                 }
+
+                if (pagingParameters != null)
+                {
+                    sqlBuilder.AppendLine();
+                    sqlBuilder.AppendLine($"OFFSET {(pagingParameters.PageNumber - 1) * pagingParameters.PageSize} ROWS");
+                    sqlBuilder.AppendLine($"FETCH NEXT {pagingParameters.PageSize} ROWS ONLY");
+                }
             }
 
-            if (pagingParameters != null)
+            var result = await GetListAsync<BookHistoryData>(parameters, sqlBuilder.ToString(), cmdType: CommandType.Text);
+            if (result == null)
             {
-                sqlBuilder.AppendLine();
-                sqlBuilder.AppendLine($"OFFSET {(pagingParameters.PageNumber - 1) * pagingParameters.PageSize} ROWS");
-                sqlBuilder.AppendLine($"FETCH NEXT {pagingParameters.PageSize} ROWS ONLY");
+                return [];
             }
 
-            return await GetListAsync<BookHistoryDto>(parameters, sqlBuilder.ToString(), cmdType: CommandType.Text);
+            return result.Select(item => new BookHistoryResult()
+            {
+                Id = item.Id,
+                BookId = item.BookId,
+                OperationDate = item.OperationDate,
+                OperationId = (item.OperationId == null ? null : (BookOperation)item.OperationId),
+                Title = item.Title,
+                ShortDescription = item.ShortDescription,
+                PublishDate = item.PublishDate.ConvertToDateOnly(),
+                Authors = JsonSerializer.Deserialize<IEnumerable<Author>>(item.Authors),
+                Count = item.Count
+            });
         }
 
         #region Auxiliary
@@ -114,10 +178,10 @@ namespace Genetec.BookHistory.SQLRepositories
                     var parameterNameTo = $"{field}To{parameterIndex}";
 
                     sqlBuilder.Append($" and {GetNegationSql(filter)}{field} between @{parameterNameFrom} and @{parameterNameTo}");
-                    
+
                     parameters.Add(parameterNameFrom, filter.GetFromDate());
                     parameters.Add(parameterNameTo, filter.GetToDate());
-                    
+
                     parameterIndex++;
                 }
             }
@@ -188,6 +252,11 @@ namespace Genetec.BookHistory.SQLRepositories
             }
 
             return field;
+        }
+
+        private static string GetJsonConvertSql(string field)
+        {
+            return $"convert(nvarchar(4000), {field})";
         }
 
         #endregion

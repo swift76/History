@@ -1,4 +1,4 @@
-﻿namespace Genetec.BookHistory.Entities.Extensions
+﻿namespace Genetec.BookHistory.Utilities.Extensions
 {
     public static class DateExtensions
     {
