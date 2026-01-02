@@ -1,11 +1,16 @@
 <Solution>
   <Folder Name="/Database/">
+    <Project Path="Genetec.BookHistory.Postgre/Genetec.BookHistory.Postgre.sqlproj" Id="1ed2b9c8-f021-4d63-b4c6-45200d260bc5">
+      <Build />
+      <Deploy />
+    </Project>
     <Project Path="Genetec.BookHistory.SQL/Genetec.BookHistory.SQL.sqlproj" Id="df2c4b90-c9a7-43bd-9caa-7f41649d2237">
       <Build />
       <Deploy />
     </Project>
   </Folder>
   <Folder Name="/Repositories/">
+    <Project Path="Genetec.BookHistory.PostgreRepositories/Genetec.BookHistory.PostgreRepositories.csproj" Id="11fd5595-e30f-4d6d-9cd0-612afb08a2d7" />
     <Project Path="Genetec.BookHistory.SQLRepositories/Genetec.BookHistory.SQLRepositories.csproj" />
   </Folder>
   <Project Path="Genetec.BookHistory.API/Genetec.BookHistory.API.csproj" />

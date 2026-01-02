@@ -14,3 +14,12 @@ CREATE TABLE BookHistory (
 	CONSTRAINT fkBookHistory1 FOREIGN KEY (BookId) REFERENCES Book(Id)
 )
 GO
+
+CREATE INDEX iBookHistory1 ON BookHistory(BookId)
+GO
+
+CREATE INDEX iBookHistory2 ON BookHistory(OperationDate)
+GO
+
+CREATE INDEX iBookHistory3 ON BookHistory(OperationId)
+GO
