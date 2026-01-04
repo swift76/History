@@ -1,7 +1,9 @@
 using Genetec.BookHistory.Entities.RepositoryContracts;
-using Genetec.BookHistory.SQLRepositories;
 using Genetec.BookHistory.PostgreRepositories;
+using Genetec.BookHistory.SQLRepositories;
 using Microsoft.OpenApi;
+using Prometheus;
+using Prometheus.DotNetRuntime;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,11 +11,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var sqlServerConnectionString = builder.Configuration.GetConnectionString("SQLServer");
 var postgreSQLConnectionString = builder.Configuration.GetConnectionString("PostgreSQL");
+
+//If SQLServer connection string exists and is filled, then SQL+Dapper implementation will work
 if (!string.IsNullOrWhiteSpace(sqlServerConnectionString))
 {
-    builder.Services.AddSingleton<IBookRepository>(new BookRepository(sqlServerConnectionString));
-    builder.Services.AddSingleton<IBookHistoryRepository>(new BookHistoryRepository(sqlServerConnectionString));
+    builder.Services.AddSingleton<IBookRepository>(new DapperBookRepository(sqlServerConnectionString));
+    builder.Services.AddSingleton<IBookHistoryRepository>(new DapperBookHistoryRepository(sqlServerConnectionString));
 }
+//Otherwise, if PostgreSQL connection string exists and is filled, then PostGre+EF implementation will work
 else if (!string.IsNullOrWhiteSpace(postgreSQLConnectionString))
 {
     builder.Services.AddSingleton<IBookRepository>(new EFBookRepository(postgreSQLConnectionString));
@@ -23,6 +28,8 @@ else
 {
     throw new Exception("Connection string is not specified");
 }
+
+//TODO: Add Serilog logging
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -42,6 +49,14 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+app.UseRouting();
+
+// Collect HTTP request metrics
+app.UseHttpMetrics();
+
+// Collect .NET runtime metrics (GC, memory, threads)
+DotNetRuntimeStatsBuilder.Default().StartCollecting();
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -50,5 +65,10 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapMetrics(); // /metrics
+});
 
 app.Run();

@@ -1,5 +1,4 @@
-﻿using Genetec.BookHistory.Entities.Base;
-using Genetec.BookHistory.Entities.Enums;
+﻿using Genetec.BookHistory.Entities.Enums;
 using Genetec.BookHistory.Entities.Filters;
 using Genetec.BookHistory.Entities.Orders;
 using Genetec.BookHistory.Entities.Paging;

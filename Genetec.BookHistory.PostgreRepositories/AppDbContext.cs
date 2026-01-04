@@ -1,12 +1,12 @@
 ﻿using Genetec.BookHistory.PostgreRepositories.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Genetec.BookHistory.PostgreRepositories.Base
+namespace Genetec.BookHistory.PostgreRepositories
 {
     public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {
-        public DbSet<BookData> Books => Set<BookData>();
-        public DbSet<BookHistoryData> BookHistories => Set<BookHistoryData>();
+        internal DbSet<BookData> Books => Set<BookData>();
+        internal DbSet<BookHistoryData> BookHistories => Set<BookHistoryData>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -1,6 +1,6 @@
 ﻿namespace Genetec.BookHistory.SQLRepositories.Data
 {
-    public class BookHistoryData
+    internal class BookHistoryData
     {
         public int? Id { get; set; }
 

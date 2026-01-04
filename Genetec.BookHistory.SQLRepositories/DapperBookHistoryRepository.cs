@@ -15,7 +15,7 @@ using System.Text;
 
 namespace Genetec.BookHistory.SQLRepositories
 {
-    public class BookHistoryRepository(string connectionString) : BaseRepository(connectionString), IBookHistoryRepository
+    public class DapperBookHistoryRepository(string connectionString) : DapperBaseRepository(connectionString), IBookHistoryRepository
     {
         public async Task<IEnumerable<BookHistoryResult>> Get(BookHistoryFilter? filter = null
             , IEnumerable<BookHistoryOrder>? orders = null
@@ -63,10 +63,7 @@ namespace Genetec.BookHistory.SQLRepositories
 
                 GenerateRangeFilter(filter.OperationDateFilters, "OperationDate", ref sqlBuilder, ref parameters);
 
-                if (filter.OperationTypeFilter?.Values?.Count() > 0)
-                {
-                    sqlBuilder.Append($" and {GetNegationSql(filter.OperationTypeFilter)}OperationId in ({ListJoiner.Get(filter.OperationTypeFilter.Values.Select(item => (byte)item))})");
-                }
+                GenerateOperationTypeFilter(filter.OperationTypeFilter, ref sqlBuilder);
 
                 GenerateStringFilter(filter.TitleFilters, "Title", ref sqlBuilder, ref parameters);
 
@@ -74,20 +71,7 @@ namespace Genetec.BookHistory.SQLRepositories
 
                 GenerateRangeFilter(filter.PublishDateFilters, "PublishDate", ref sqlBuilder, ref parameters);
 
-                if (filter.AuthorsFilters?.Count() > 0)
-                {
-                    int parameterIndex = 0;
-                    foreach (var authorsFilter in filter.AuthorsFilters)
-                    {
-                        sqlBuilder.AppendLine($" and {GetNegationSql(authorsFilter)}EXISTS ");
-                        sqlBuilder.AppendLine("(SELECT 1 FROM OPENJSON(Authors) WITH (Name nvarchar(200) '$.Name')");
-                        sqlBuilder.Append($"WHERE {GetCaseInsensitiveField(authorsFilter, "Name")}");
-
-                        GenerateStringCondition(authorsFilter, "Name", parameterIndex, ref sqlBuilder, ref parameters);
-                        sqlBuilder.AppendLine(")");
-                        parameterIndex++;
-                    }
-                }
+                GenerateAuthorsFilters(filter.AuthorsFilters, ref sqlBuilder, ref parameters);
             }
 
             if (groupColumns != null)
@@ -211,8 +195,6 @@ namespace Genetec.BookHistory.SQLRepositories
                 filter.Value = filter.Value.ToLower();
             }
 
-            filter.Value = filter.Value.Replace("'", "''");
-
             switch (filter.FilterOperation)
             {
                 case StringFilterOperation.Contains:
@@ -231,6 +213,32 @@ namespace Genetec.BookHistory.SQLRepositories
                     sqlBuilder.Append($" = @{parameterName}");
                     parameters.Add(parameterName, filter.Value);
                     break;
+            }
+        }
+
+        private static void GenerateOperationTypeFilter(ListFilter<BookOperation>? operationTypeFilter, ref StringBuilder sqlBuilder)
+        {
+            if (operationTypeFilter?.Values?.Count() > 0)
+            {
+                sqlBuilder.Append($" and {GetNegationSql(operationTypeFilter)}OperationId in ({ListJoiner.Get(operationTypeFilter.Values.Select(item => (byte)item))})");
+            }
+        }
+
+        private static void GenerateAuthorsFilters(IEnumerable<StringFilter>? authorsFilters, ref StringBuilder sqlBuilder, ref DynamicParameters parameters)
+        {
+            if (authorsFilters?.Count() > 0)
+            {
+                int parameterIndex = 0;
+                foreach (var authorsFilter in authorsFilters)
+                {
+                    sqlBuilder.AppendLine($" and {GetNegationSql(authorsFilter)}EXISTS ");
+                    sqlBuilder.AppendLine("(SELECT 1 FROM OPENJSON(Authors) WITH (Name nvarchar(200) '$.Name')");
+                    sqlBuilder.Append($"WHERE {GetCaseInsensitiveField(authorsFilter, "Name")}");
+
+                    GenerateStringCondition(authorsFilter, "Name", parameterIndex, ref sqlBuilder, ref parameters);
+                    sqlBuilder.AppendLine(")");
+                    parameterIndex++;
+                }
             }
         }
 

@@ -4,7 +4,7 @@ using System.Data;
 
 namespace Genetec.BookHistory.SQLRepositories.Base
 {
-    public abstract class BaseRepository(string connectionString)
+    public abstract class DapperBaseRepository(string connectionString)
     {
         private readonly string connectionString = connectionString;
 

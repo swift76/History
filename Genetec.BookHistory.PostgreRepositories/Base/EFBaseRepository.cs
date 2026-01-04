@@ -8,11 +8,11 @@ namespace Genetec.BookHistory.PostgreRepositories.Base
 
         protected AppDbContext CreateContext()
         {
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseNpgsql(connectionString)
-                .Options;
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-            return new AppDbContext(options);
+            return new AppDbContext(new DbContextOptionsBuilder<AppDbContext>()
+                .UseNpgsql(connectionString)
+                .Options);
         }
     }
 }

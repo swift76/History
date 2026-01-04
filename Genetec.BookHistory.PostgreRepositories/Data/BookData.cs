@@ -1,6 +1,6 @@
 ﻿namespace Genetec.BookHistory.PostgreRepositories.Data
 {
-    public class BookData
+    internal class BookData
     {
         public int Id { get; set; }
 

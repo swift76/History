@@ -170,10 +170,7 @@ namespace Genetec.BookHistory.PostgreRepositories
                     Title = book.Title,
                     ShortDescription = book.ShortDescription,
                     PublishDate = book.PublishDate.ConvertToDateTime(),
-                    Authors = book.Authors.Select(item => new Author()
-                    {
-                        Name = item
-                    }),
+                    Authors = book.Authors.ToAuthorsEnumerable(),
                     IsDeleted = book.IsDeleted,
                     RevisionNumber = book.RevisionNumber
                 };

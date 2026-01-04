@@ -7,7 +7,7 @@ using Genetec.BookHistory.SQLRepositories.Base;
 
 namespace Genetec.BookHistory.SQLRepositories
 {
-    public class BookRepository(string connectionString) : BaseRepository(connectionString), IBookRepository
+    public class DapperBookRepository(string connectionString) : DapperBaseRepository(connectionString), IBookRepository
     {
         public async Task<InsertBookResult?> Insert(string title, string shortDescription, DateOnly publishDate, IEnumerable<string> authors)
         {
