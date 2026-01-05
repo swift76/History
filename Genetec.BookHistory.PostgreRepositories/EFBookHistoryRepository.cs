@@ -21,7 +21,7 @@ namespace Genetec.BookHistory.PostgreRepositories
         {
             await using var context = CreateContext();
 
-            IQueryable<BookHistoryData>? query = context.BookHistories.AsNoTracking();
+            var query = context.BookHistories.AsNoTracking();
 
             if (filter != null)
             {

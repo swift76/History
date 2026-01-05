@@ -44,11 +44,10 @@ namespace Genetec.BookHistory.PostgreRepositories
 
                 return new InsertBookResult { Id = book.Id, RevisionNumber = book.RevisionNumber };
             }
-            catch (Exception ex)
+            catch
             {
                 await transaction.RollbackAsync();
-
-                throw new ApplicationException("Error inserting book: " + ex.Message, ex);
+                throw;
             }
         }
 
@@ -108,11 +107,10 @@ namespace Genetec.BookHistory.PostgreRepositories
 
                 return new UpdateBookResult { RevisionNumber = book.RevisionNumber };
             }
-            catch (Exception ex)
+            catch
             {
                 await transaction.RollbackAsync();
-
-                throw new ApplicationException("Error updating book: " + ex.Message, ex);
+                throw;
             }
         }
 
@@ -141,11 +139,10 @@ namespace Genetec.BookHistory.PostgreRepositories
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
             }
-            catch (Exception ex)
+            catch
             {
                 await transaction.RollbackAsync();
-
-                throw new ApplicationException("Error deleting book: " + ex.Message, ex);
+                throw;
             }
         }
 
@@ -153,31 +150,24 @@ namespace Genetec.BookHistory.PostgreRepositories
         {
             await using var context = CreateContext();
 
-            try
-            {
-                var book = await context.Books
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(item => item.Id == id);
+            var book = await context.Books
+                .AsNoTracking()
+                .FirstOrDefaultAsync(item => item.Id == id);
 
-                if (book == null)
-                {
-                    return null;
-                }
-
-                return new GetBookResult
-                {
-                    Title = book.Title,
-                    ShortDescription = book.ShortDescription,
-                    PublishDate = book.PublishDate.ConvertToDateTime(),
-                    Authors = book.Authors.ToAuthorsEnumerable(),
-                    IsDeleted = book.IsDeleted,
-                    RevisionNumber = book.RevisionNumber
-                };
-            }
-            catch (Exception ex)
+            if (book == null)
             {
-                throw new ApplicationException("Error getting book: " + ex.Message, ex);
+                return null;
             }
+
+            return new GetBookResult
+            {
+                Title = book.Title,
+                ShortDescription = book.ShortDescription,
+                PublishDate = book.PublishDate.ConvertToDateTime(),
+                Authors = book.Authors.ToAuthorsEnumerable(),
+                IsDeleted = book.IsDeleted,
+                RevisionNumber = book.RevisionNumber
+            };
         }
     }
 }

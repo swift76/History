@@ -36,15 +36,8 @@ namespace Genetec.BookHistory.API.Controllers
                 }
             }
 
-            try
-            {
-                var result = await _bookHistoryRepository.Get(request.Filter, orders, request.PagingParameters, groups);
-                return StatusCode(StatusCodes.Status200OK, result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
+            var result = await _bookHistoryRepository.Get(request.Filter, orders, request.PagingParameters, groups);
+            return StatusCode(StatusCodes.Status200OK, result);
         }
     }
 }

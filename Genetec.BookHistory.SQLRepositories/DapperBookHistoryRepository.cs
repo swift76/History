@@ -37,7 +37,7 @@ namespace Genetec.BookHistory.SQLRepositories
                 groupColumns = [.. selectColumns];
                 
                 //Workaround for json-typed Authors, to avoid exceptions during grouping
-                int indexAuthors = selectColumns.IndexOf("Authors");
+                var indexAuthors = selectColumns.IndexOf("Authors");
                 if (indexAuthors >= 0)
                 {
                     var authorsConvertSql = GetJsonConvertSql("Authors");
@@ -155,7 +155,7 @@ namespace Genetec.BookHistory.SQLRepositories
         {
             if (filters?.Count() > 0)
             {
-                int parameterIndex = 0;
+                var parameterIndex = 0;
                 foreach (var filter in filters)
                 {
                     var parameterNameFrom = $"{field}From{parameterIndex}";
@@ -175,7 +175,7 @@ namespace Genetec.BookHistory.SQLRepositories
         {
             if (filters?.Count() > 0)
             {
-                int parameterIndex = 0;
+                var parameterIndex = 0;
                 foreach (var filter in filters)
                 {
                     sqlBuilder.Append($" and {GetNegationSql(filter)}{GetCaseInsensitiveField(filter, field)}");
@@ -221,7 +221,7 @@ namespace Genetec.BookHistory.SQLRepositories
         {
             if (authorsFilters?.Count() > 0)
             {
-                int parameterIndex = 0;
+                var parameterIndex = 0;
                 foreach (var authorsFilter in authorsFilters)
                 {
                     sqlBuilder.AppendLine($" and {GetNegationSql(authorsFilter)}EXISTS ");
@@ -237,14 +237,14 @@ namespace Genetec.BookHistory.SQLRepositories
 
         private static DateTime GetDateTimeParameterValue<T>(T value)
         {
-            if (value is DateTime dt)
+            if (value is DateTime datetimeValue)
             {
-                return dt;
+                return datetimeValue;
             }
 
-            if (value is DateOnly d)
+            if (value is DateOnly dateonlyValue)
             {
-                return d.ConvertToDateTime();
+                return dateonlyValue.ConvertToDateTime();
             }
 
             throw new ArgumentException($"Unsupported type: {typeof(T)}");

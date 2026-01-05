@@ -1,9 +1,12 @@
 using Genetec.BookHistory.Entities.RepositoryContracts;
 using Genetec.BookHistory.PostgreRepositories;
 using Genetec.BookHistory.SQLRepositories;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.OpenApi;
 using Prometheus;
 using Prometheus.DotNetRuntime;
+using Serilog;
+using Serilog.Exceptions;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,7 +32,14 @@ else
     throw new Exception("Connection string is not specified");
 }
 
-//TODO: Add Serilog logging
+//Serilog logging
+builder.Logging.ClearProviders();
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .Enrich.WithExceptionDetails()
+    .CreateLogger();
+builder.Logging.AddSerilog(logger);
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -69,6 +79,30 @@ app.MapControllers();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapMetrics(); // /metrics
+});
+
+app.UseExceptionHandler(appBuilder =>
+{
+    appBuilder.Run(async context =>
+    {
+        var exceptionFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+        var message = "Unexpected exception";
+        if (exceptionFeature?.Error != null)
+        {
+            try
+            {
+                Log.Error(exceptionFeature.Error, message);
+            }
+            catch
+            {
+            }
+
+            message = exceptionFeature.Error.Message;
+        }
+
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        await context.Response.WriteAsync(message);
+    });
 });
 
 app.Run();
