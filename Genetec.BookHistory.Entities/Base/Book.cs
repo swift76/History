@@ -14,10 +14,5 @@ namespace Genetec.BookHistory.Entities.Base
 
         //Just plain list of authors' names (without IDs), as CRUD operations on authors are out of scope.
         public virtual IEnumerable<Author>? Authors { get; set; }
-
-        public IEnumerable<string>? GetNormalizedAuthors()
-        {
-            return Authors?.Select(item => item.Name.Trim());
-        }
     }
 }

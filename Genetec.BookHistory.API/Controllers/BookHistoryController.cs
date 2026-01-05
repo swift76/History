@@ -1,6 +1,7 @@
 using Genetec.BookHistory.Entities.RepositoryContracts;
 using Genetec.BookHistory.Entities.Requests;
 using Genetec.BookHistory.Utilities;
+using Genetec.BookHistory.Utilities.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Genetec.BookHistory.API.Controllers

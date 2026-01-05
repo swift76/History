@@ -26,5 +26,20 @@
 
             return DateOnly.FromDateTime(value.Value);
         }
+
+        public static DateOnly? GetUpdatedValue(this DateOnly? value, DateTime previousValue)
+        {
+            if (!value.HasValue)
+            {
+                return null;
+            }
+
+            if (value.Value.ConvertToDateTime() == previousValue)
+            {
+                return null;
+            }
+
+            return value;
+        }
     }
 }

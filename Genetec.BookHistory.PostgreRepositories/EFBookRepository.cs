@@ -1,10 +1,9 @@
-﻿using Genetec.BookHistory.Entities.Base;
-using Genetec.BookHistory.Entities.Enums;
+﻿using Genetec.BookHistory.Entities.Enums;
+using Genetec.BookHistory.Utilities.Extensions;
 using Genetec.BookHistory.Entities.RepositoryContracts;
 using Genetec.BookHistory.Entities.Responses;
 using Genetec.BookHistory.PostgreRepositories.Base;
 using Genetec.BookHistory.PostgreRepositories.Data;
-using Genetec.BookHistory.Utilities.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Genetec.BookHistory.PostgreRepositories

@@ -1,7 +1,7 @@
 ﻿using Genetec.BookHistory.Entities.Enums;
 using Genetec.BookHistory.Entities.Orders;
 
-namespace Genetec.BookHistory.API
+namespace Genetec.BookHistory.Utilities.Extensions
 {
     public static class IEnumerableExtensions
     {

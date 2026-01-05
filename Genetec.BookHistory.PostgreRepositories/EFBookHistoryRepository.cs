@@ -7,6 +7,7 @@ using Genetec.BookHistory.Entities.Responses;
 using Genetec.BookHistory.PostgreRepositories.Base;
 using Genetec.BookHistory.PostgreRepositories.Data;
 using Genetec.BookHistory.Utilities;
+using Genetec.BookHistory.Utilities.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Genetec.BookHistory.PostgreRepositories
@@ -244,88 +245,55 @@ namespace Genetec.BookHistory.PostgreRepositories
             return query;
         }
 
-        //TODO: Optimize and make it more generic, using expression trees
-
         private static IQueryable<BookHistoryData>? ApplyTitleFilter(IQueryable<BookHistoryData>? query, IEnumerable<StringFilter>? titleFilters)
         {
             if (query != null && titleFilters?.Count() > 0)
             {
                 foreach (var stringFilter in titleFilters)
                 {
+                    var value = SqlCondition.GetLikeValue(stringFilter);
                     if (stringFilter.IsCaseInsensitive)
                     {
                         query = stringFilter.FilterOperation switch
                         {
-                            StringFilterOperation.Contains =>
+                            StringFilterOperation.Equals =>
                                 stringFilter.IsNegation
                                     ? query.Where(item =>
                                         item.Title == null ||
-                                        !EF.Functions.ILike(item.Title, $"%{stringFilter.Value}%"))
+                                        item.Title.ToLower() != value)
                                     : query.Where(item =>
                                         item.Title != null &&
-                                        EF.Functions.ILike(item.Title, $"%{stringFilter.Value}%")),
-                            StringFilterOperation.StartsWith =>
-                                stringFilter.IsNegation
-                                    ? query.Where(item =>
-                                        item.Title == null ||
-                                        !EF.Functions.ILike(item.Title, $"{stringFilter.Value}%"))
-                                    : query.Where(item =>
-                                        item.Title != null &&
-                                        EF.Functions.ILike(item.Title, $"{stringFilter.Value}%")),
-                            StringFilterOperation.EndsWith =>
-                                stringFilter.IsNegation
-                                    ? query.Where(item =>
-                                        item.Title == null ||
-                                        !EF.Functions.ILike(item.Title, $"%{stringFilter.Value}"))
-                                    : query.Where(item =>
-                                        item.Title != null &&
-                                        EF.Functions.ILike(item.Title, $"%{stringFilter.Value}")),
+                                        item.Title.ToLower() == value),
                             _ =>
                                 stringFilter.IsNegation
                                     ? query.Where(item =>
                                         item.Title == null ||
-                                        item.Title.ToLower() != stringFilter.Value.ToLower())
+                                        !EF.Functions.ILike(item.Title, value))
                                     : query.Where(item =>
                                         item.Title != null &&
-                                        item.Title.ToLower() == stringFilter.Value.ToLower())
+                                        EF.Functions.ILike(item.Title, value))
                         };
                     }
                     else
                     {
                         query = stringFilter.FilterOperation switch
                         {
-                            StringFilterOperation.Contains =>
+                            StringFilterOperation.Equals =>
                                 stringFilter.IsNegation
                                     ? query.Where(item =>
                                         item.Title == null ||
-                                        !EF.Functions.Like(item.Title, $"%{stringFilter.Value}%"))
+                                        item.Title != value)
                                     : query.Where(item =>
                                         item.Title != null &&
-                                        EF.Functions.Like(item.Title, $"%{stringFilter.Value}%")),
-                            StringFilterOperation.StartsWith =>
-                                stringFilter.IsNegation
-                                    ? query.Where(item =>
-                                        item.Title == null ||
-                                        !EF.Functions.Like(item.Title, $"{stringFilter.Value}%"))
-                                    : query.Where(item =>
-                                        item.Title != null &&
-                                        EF.Functions.Like(item.Title, $"{stringFilter.Value}%")),
-                            StringFilterOperation.EndsWith =>
-                                stringFilter.IsNegation
-                                    ? query.Where(item =>
-                                        item.Title == null ||
-                                        !EF.Functions.Like(item.Title, $"%{stringFilter.Value}"))
-                                    : query.Where(item =>
-                                        item.Title != null &&
-                                        EF.Functions.Like(item.Title, $"%{stringFilter.Value}")),
+                                        item.Title == value),
                             _ =>
                                 stringFilter.IsNegation
                                     ? query.Where(item =>
                                         item.Title == null ||
-                                        item.Title != stringFilter.Value)
+                                        !EF.Functions.Like(item.Title, value))
                                     : query.Where(item =>
                                         item.Title != null &&
-                                        item.Title == stringFilter.Value)
+                                        EF.Functions.Like(item.Title, value))
                         };
                     }
                 }
@@ -340,80 +308,49 @@ namespace Genetec.BookHistory.PostgreRepositories
             {
                 foreach (var stringFilter in shortDescriptionFilters)
                 {
+                    var value = SqlCondition.GetLikeValue(stringFilter);
                     if (stringFilter.IsCaseInsensitive)
                     {
                         query = stringFilter.FilterOperation switch
                         {
-                            StringFilterOperation.Contains =>
+                            StringFilterOperation.Equals =>
                                 stringFilter.IsNegation
                                     ? query.Where(item =>
                                         item.ShortDescription == null ||
-                                        !EF.Functions.ILike(item.ShortDescription, $"%{stringFilter.Value}%"))
+                                        item.ShortDescription.ToLower() != value)
                                     : query.Where(item =>
                                         item.ShortDescription != null &&
-                                        EF.Functions.ILike(item.ShortDescription, $"%{stringFilter.Value}%")),
-                            StringFilterOperation.StartsWith =>
-                                stringFilter.IsNegation
-                                    ? query.Where(item =>
-                                        item.ShortDescription == null ||
-                                        !EF.Functions.ILike(item.ShortDescription, $"{stringFilter.Value}%"))
-                                    : query.Where(item =>
-                                        item.ShortDescription != null &&
-                                        EF.Functions.ILike(item.ShortDescription, $"{stringFilter.Value}%")),
-                            StringFilterOperation.EndsWith =>
-                                stringFilter.IsNegation
-                                    ? query.Where(item =>
-                                        item.ShortDescription == null ||
-                                        !EF.Functions.ILike(item.ShortDescription, $"%{stringFilter.Value}"))
-                                    : query.Where(item =>
-                                        item.ShortDescription != null &&
-                                        EF.Functions.ILike(item.ShortDescription, $"%{stringFilter.Value}")),
+                                        item.ShortDescription.ToLower() == value),
                             _ =>
                                 stringFilter.IsNegation
                                     ? query.Where(item =>
                                         item.ShortDescription == null ||
-                                        item.ShortDescription.ToLower() != stringFilter.Value.ToLower())
+                                        !EF.Functions.ILike(item.ShortDescription, value))
                                     : query.Where(item =>
                                         item.ShortDescription != null &&
-                                        item.ShortDescription.ToLower() == stringFilter.Value.ToLower())
+                                        EF.Functions.ILike(item.ShortDescription, value))
                         };
                     }
                     else
                     {
                         query = stringFilter.FilterOperation switch
                         {
-                            StringFilterOperation.Contains =>
+                            StringFilterOperation.Equals =>
                                 stringFilter.IsNegation
                                     ? query.Where(item =>
                                         item.ShortDescription == null ||
-                                        !EF.Functions.Like(item.ShortDescription, $"%{stringFilter.Value}%"))
+                                        item.ShortDescription != value)
                                     : query.Where(item =>
                                         item.ShortDescription != null &&
-                                        EF.Functions.Like(item.ShortDescription, $"%{stringFilter.Value}%")),
-                            StringFilterOperation.StartsWith =>
-                                stringFilter.IsNegation
-                                    ? query.Where(item =>
-                                        item.ShortDescription == null ||
-                                        !EF.Functions.Like(item.ShortDescription, $"{stringFilter.Value}%"))
-                                    : query.Where(item =>
-                                        item.ShortDescription != null &&
-                                        EF.Functions.Like(item.ShortDescription, $"{stringFilter.Value}%")),
-                            StringFilterOperation.EndsWith =>
-                                stringFilter.IsNegation
-                                    ? query.Where(item =>
-                                        item.ShortDescription == null ||
-                                        !EF.Functions.Like(item.ShortDescription, $"%{stringFilter.Value}"))
-                                    : query.Where(item =>
-                                        item.ShortDescription != null &&
-                                        EF.Functions.Like(item.ShortDescription, $"%{stringFilter.Value}")),
+                                        item.ShortDescription == value),
                             _ =>
                                 stringFilter.IsNegation
                                     ? query.Where(item =>
                                         item.ShortDescription == null ||
-                                        item.ShortDescription != stringFilter.Value)
+                                        !EF.Functions.Like(item.ShortDescription, value))
                                     : query.Where(item =>
                                         item.ShortDescription != null &&
-                                        item.ShortDescription == stringFilter.Value)
+                                        EF.Functions.Like(item.ShortDescription, value))
                         };
                     }
                 }
@@ -428,80 +365,49 @@ namespace Genetec.BookHistory.PostgreRepositories
             {
                 foreach (var stringFilter in authorsFilters)
                 {
+                    var value = SqlCondition.GetLikeValue(stringFilter);
                     if (stringFilter.IsCaseInsensitive)
                     {
                         query = stringFilter.FilterOperation switch
                         {
-                            StringFilterOperation.Contains =>
+                            StringFilterOperation.Equals =>
                                 stringFilter.IsNegation
                                     ? query.Where(item =>
                                         item.Authors == null ||
-                                        !item.Authors.Any(a => EF.Functions.ILike(a, $"%{stringFilter.Value}%")))
+                                        !item.Authors.Any(a => a.ToLower() == value))
                                     : query.Where(item =>
                                         item.Authors != null &&
-                                        item.Authors.Any(a => EF.Functions.ILike(a, $"%{stringFilter.Value}%"))),
-                            StringFilterOperation.StartsWith =>
-                                stringFilter.IsNegation
-                                    ? query.Where(item =>
-                                        item.Authors == null ||
-                                        !item.Authors.Any(a => EF.Functions.ILike(a, $"{stringFilter.Value}%")))
-                                    : query.Where(item =>
-                                        item.Authors != null &&
-                                        item.Authors.Any(a => EF.Functions.ILike(a, $"{stringFilter.Value}%"))),
-                            StringFilterOperation.EndsWith =>
-                                stringFilter.IsNegation
-                                    ? query.Where(item =>
-                                        item.Authors == null ||
-                                        !item.Authors.Any(a => EF.Functions.ILike(a, $"%{stringFilter.Value}")))
-                                    : query.Where(item =>
-                                        item.Authors != null &&
-                                        item.Authors.Any(a => EF.Functions.ILike(a, $"%{stringFilter.Value}"))),
+                                        item.Authors.Any(a => a.ToLower() == value)),
                             _ =>
                                 stringFilter.IsNegation
                                     ? query.Where(item =>
                                         item.Authors == null ||
-                                        !item.Authors.Any(a => a.ToLower() == stringFilter.Value.ToLower()))
+                                        !item.Authors.Any(a => EF.Functions.ILike(a, value)))
                                     : query.Where(item =>
                                         item.Authors != null &&
-                                        item.Authors.Any(a => a.ToLower() == stringFilter.Value.ToLower()))
+                                        item.Authors.Any(a => EF.Functions.ILike(a, value)))
                         };
                     }
                     else
                     {
                         query = stringFilter.FilterOperation switch
                         {
-                            StringFilterOperation.Contains =>
+                            StringFilterOperation.Equals =>
                                 stringFilter.IsNegation
                                     ? query.Where(item =>
                                         item.Authors == null ||
-                                        !item.Authors.Any(a => EF.Functions.Like(a, $"%{stringFilter.Value}%")))
+                                        !item.Authors.Any(a => a == value))
                                     : query.Where(item =>
                                         item.Authors != null &&
-                                        item.Authors.Any(a => EF.Functions.Like(a, $"%{stringFilter.Value}%"))),
-                            StringFilterOperation.StartsWith =>
-                                stringFilter.IsNegation
-                                    ? query.Where(item =>
-                                        item.Authors == null ||
-                                        !item.Authors.Any(a => EF.Functions.Like(a, $"{stringFilter.Value}%")))
-                                    : query.Where(item =>
-                                        item.Authors != null &&
-                                        item.Authors.Any(a => EF.Functions.Like(a, $"{stringFilter.Value}%"))),
-                            StringFilterOperation.EndsWith =>
-                                stringFilter.IsNegation
-                                    ? query.Where(item =>
-                                        item.Authors == null ||
-                                        !item.Authors.Any(a => EF.Functions.Like(a, $"%{stringFilter.Value}")))
-                                    : query.Where(item =>
-                                        item.Authors != null &&
-                                        item.Authors.Any(a => EF.Functions.Like(a, $"%{stringFilter.Value}"))),
+                                        item.Authors.Any(a => a == value)),
                             _ =>
                                 stringFilter.IsNegation
                                     ? query.Where(item =>
                                         item.Authors == null ||
-                                        !item.Authors.Any(a => a == stringFilter.Value))
+                                        !item.Authors.Any(a => EF.Functions.Like(a, value)))
                                     : query.Where(item =>
                                         item.Authors != null &&
-                                        item.Authors.Any(a => a == stringFilter.Value))
+                                        item.Authors.Any(a => EF.Functions.Like(a, value)))
                         };
                     }
                 }

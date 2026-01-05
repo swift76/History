@@ -1,5 +1,6 @@
 using Genetec.BookHistory.Entities.RepositoryContracts;
 using Genetec.BookHistory.Entities.Requests;
+using Genetec.BookHistory.Utilities.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Genetec.BookHistory.API.Controllers
@@ -13,7 +14,7 @@ namespace Genetec.BookHistory.API.Controllers
         [HttpPost(Name = "Insert")]
         public async Task<IActionResult> Insert([FromBody] InsertBook book)
         {
-            var authors = book.GetNormalizedAuthors();
+            var authors = book.Authors.GetNormalizedAuthors();
             if (authors?.Count() == 0)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, "Authors are not specified");
@@ -51,10 +52,10 @@ namespace Genetec.BookHistory.API.Controllers
                     return StatusCode(StatusCodes.Status400BadRequest, "The last revision number is wrong");
                 }
 
-                var updatedTitle = book.GetUpdatedTitle(currentBook.Title);
-                var updatedShortDescription = book.GetUpdatedShortDescription(currentBook.ShortDescription);
-                var updatedPublishDate = book.GetUpdatedPublishDate(currentBook.PublishDate);
-                var updatedAuthors = book.GetUpdatedAuthors(currentBook.Authors);
+                var updatedTitle = book.Title.GetUpdatedValue(currentBook.Title);
+                var updatedShortDescription = book.ShortDescription.GetUpdatedValue(currentBook.ShortDescription);
+                var updatedPublishDate = book.PublishDate.GetUpdatedValue(currentBook.PublishDate);
+                var updatedAuthors = book.Authors.GetUpdatedValue(currentBook.Authors);
 
                 if (updatedTitle == null 
                     && updatedShortDescription == null

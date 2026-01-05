@@ -163,8 +163,8 @@ namespace Genetec.BookHistory.SQLRepositories
 
                     sqlBuilder.Append($" and {GetNegationSql(filter)}{field} between @{parameterNameFrom} and @{parameterNameTo}");
 
-                    parameters.Add(parameterNameFrom, filter.GetFromDate());
-                    parameters.Add(parameterNameTo, filter.GetToDate());
+                    parameters.Add(parameterNameFrom, GetDateTimeParameterValue(filter.From));
+                    parameters.Add(parameterNameTo, GetDateTimeParameterValue(filter.To));
 
                     parameterIndex++;
                 }
@@ -190,30 +190,23 @@ namespace Genetec.BookHistory.SQLRepositories
         {
             var parameterName = $"{field}{parameterIndex}";
 
-            if (filter.IsCaseInsensitive)
-            {
-                filter.Value = filter.Value.ToLower();
-            }
-
             switch (filter.FilterOperation)
             {
                 case StringFilterOperation.Contains:
                     sqlBuilder.Append($" like @{parameterName}");
-                    parameters.Add(parameterName, $"%{filter.Value}%");
                     break;
                 case StringFilterOperation.StartsWith:
                     sqlBuilder.Append($" like @{parameterName}");
-                    parameters.Add(parameterName, $"{filter.Value}%");
                     break;
                 case StringFilterOperation.EndsWith:
                     sqlBuilder.Append($" like @{parameterName}");
-                    parameters.Add(parameterName, $"%{filter.Value}");
                     break;
                 default:
                     sqlBuilder.Append($" = @{parameterName}");
-                    parameters.Add(parameterName, filter.Value);
                     break;
             }
+
+            parameters.Add(parameterName, SqlCondition.GetLikeValue(filter));
         }
 
         private static void GenerateOperationTypeFilter(ListFilter<BookOperation>? operationTypeFilter, ref StringBuilder sqlBuilder)
@@ -241,6 +234,22 @@ namespace Genetec.BookHistory.SQLRepositories
                 }
             }
         }
+
+        private static DateTime GetDateTimeParameterValue<T>(T value)
+        {
+            if (value is DateTime dt)
+            {
+                return dt;
+            }
+
+            if (value is DateOnly d)
+            {
+                return d.ConvertToDateTime();
+            }
+
+            throw new ArgumentException($"Unsupported type: {typeof(T)}");
+        }
+
 
         private static string GetNegationSql(IFilter filter)
         {
