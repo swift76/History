@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
+    <PackageReference Include="prometheus-net.DotNetRuntime" Version="4.4.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BookHistory.Entities\BookHistory.Entities.csproj" />
+    <ProjectReference Include="..\BookHistory.Factory\BookHistory.Factory.csproj" />
+    <ProjectReference Include="..\BookHistory.Utilities\BookHistory.Utilities.csproj" />
+  </ItemGroup>
+
+</Project>

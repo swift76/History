@@ -1,0 +1,173 @@
+﻿using BookHistory.Entities.Enums;
+using BookHistory.Utilities.Extensions;
+using BookHistory.Entities.RepositoryContracts;
+using BookHistory.Entities.Responses;
+using BookHistory.PostgreRepositories.Base;
+using BookHistory.PostgreRepositories.Data;
+using Microsoft.EntityFrameworkCore;
+
+namespace BookHistory.PostgreRepositories
+{
+    public class EFBookRepository(string connectionString) : EFBaseRepository(connectionString), IBookRepository
+    {
+        public async Task<InsertBookResult?> Insert(string title, string shortDescription, DateOnly publishDate, IEnumerable<string> authors)
+        {
+            await using var context = CreateContext();
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var book = new BookData
+                {
+                    Title = title,
+                    ShortDescription = shortDescription,
+                    PublishDate = publishDate,
+                    Authors = [.. authors],
+                    RevisionNumber = 1
+                };
+                context.Books.Add(book);
+                await context.SaveChangesAsync();
+
+                context.BookHistories.Add(new BookHistoryData
+                {
+                    BookId = book.Id,
+                    OperationDate = DateTime.UtcNow,
+                    OperationId = (byte)BookOperation.Insert,
+                    Title = book.Title,
+                    ShortDescription = book.ShortDescription,
+                    PublishDate = book.PublishDate,
+                    Authors = book.Authors
+                });
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new InsertBookResult { Id = book.Id, RevisionNumber = book.RevisionNumber };
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<UpdateBookResult?> Update(int id, string? title, string? shortDescription, DateOnly? publishDate, IEnumerable<string>? authors, int lastRevisionNumber)
+        {
+            await using var context = CreateContext();
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var book = await context.Books.FirstOrDefaultAsync(item => item.Id == id) ?? throw new InvalidOperationException("Book not found");
+                if (book.IsDeleted)
+                {
+                    throw new InvalidOperationException("Book is deleted");
+                }
+
+                if (book.RevisionNumber != lastRevisionNumber)
+                {
+                    throw new DbUpdateConcurrencyException();
+                }
+
+                if (title != null)
+                {
+                    book.Title = title;
+                }
+
+                if (shortDescription != null)
+                {
+                    book.ShortDescription = shortDescription;
+                }
+
+                if (publishDate.HasValue)
+                {
+                    book.PublishDate = publishDate.Value;
+                }
+
+                if (authors != null)
+                {
+                    book.Authors = [.. authors];
+                }
+
+                book.RevisionNumber++;
+
+                context.BookHistories.Add(new BookHistoryData
+                {
+                    BookId = book.Id,
+                    OperationDate = DateTime.UtcNow,
+                    OperationId = (byte)BookOperation.Update,
+                    Title = book.Title,
+                    ShortDescription = book.ShortDescription,
+                    PublishDate = book.PublishDate,
+                    Authors = book.Authors
+                });
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new UpdateBookResult { RevisionNumber = book.RevisionNumber };
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task Delete(int id)
+        {
+            await using var context = CreateContext();
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var book = await context.Books.FirstOrDefaultAsync(item => item.Id == id) ?? throw new InvalidOperationException("Book not found");
+                if (book.IsDeleted)
+                {
+                    throw new InvalidOperationException("Book is deleted");
+                }
+
+                book.IsDeleted = true;
+
+                context.BookHistories.Add(new BookHistoryData
+                {
+                    BookId = book.Id,
+                    OperationDate = DateTime.UtcNow,
+                    OperationId = (byte)BookOperation.Delete
+                });
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<GetBookResult?> Get(int id)
+        {
+            await using var context = CreateContext();
+
+            var book = await context.Books
+                .AsNoTracking()
+                .FirstOrDefaultAsync(item => item.Id == id);
+
+            if (book == null)
+            {
+                return null;
+            }
+
+            return new GetBookResult
+            {
+                Title = book.Title,
+                ShortDescription = book.ShortDescription,
+                PublishDate = book.PublishDate.ConvertToDateTime(),
+                Authors = book.Authors.ToAuthorsEnumerable(),
+                IsDeleted = book.IsDeleted,
+                RevisionNumber = book.RevisionNumber
+            };
+        }
+    }
+}

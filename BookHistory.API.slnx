@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/Database/">
+    <Project Path="BookHistory.Postgre/BookHistory.Postgre.sqlproj" Id="1ed2b9c8-f021-4d63-b4c6-45200d260bc5">
+      <Build />
+      <Deploy />
+    </Project>
+    <Project Path="BookHistory.SQL/BookHistory.SQL.sqlproj" Id="df2c4b90-c9a7-43bd-9caa-7f41649d2237">
+      <Build />
+      <Deploy />
+    </Project>
+  </Folder>
+  <Folder Name="/Repositories/">
+    <Project Path="BookHistory.PostgreRepositories/BookHistory.PostgreRepositories.csproj" Id="11fd5595-e30f-4d6d-9cd0-612afb08a2d7" />
+    <Project Path="BookHistory.SQLRepositories/BookHistory.SQLRepositories.csproj" />
+  </Folder>
+  <Project Path="BookHistory.API/BookHistory.API.csproj" />
+  <Project Path="BookHistory.Entities/BookHistory.Entities.csproj" />
+  <Project Path="BookHistory.Factory/BookHistory.Factory.csproj" Id="828e8a25-c208-451c-9784-6aa1a923e7b3" />
+  <Project Path="BookHistory.Utilities/BookHistory.Utilities.csproj" Id="6f7bc5ce-8798-4bae-bc0e-2d2aaf48e261" />
+</Solution>

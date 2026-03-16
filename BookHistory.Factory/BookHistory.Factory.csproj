@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BookHistory.Entities\BookHistory.Entities.csproj" />
+    <ProjectReference Include="..\BookHistory.PostgreRepositories\BookHistory.PostgreRepositories.csproj" />
+    <ProjectReference Include="..\BookHistory.SQLRepositories\BookHistory.SQLRepositories.csproj" />
+  </ItemGroup>
+
+</Project>
